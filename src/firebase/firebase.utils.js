@@ -49,4 +49,36 @@ provider.setCustomParameters({
 
 export const signInWithGoogle = () => auth.signInWithPopup(provider);
 
+export const addCollectionAndDocument = async (key, object) => {
+  const collectionRef = firestore.collection(key);
+
+  const batch = firestore.batch();
+  object.forEach(element => {
+    const newDocRef = collectionRef.doc();
+    batch.set(newDocRef, element);
+  });
+
+  const result = await batch.commit();
+  return result;
+}
+
+export const convertCollectionsToMap = (collections) => {
+  const transfomed = collections.docs.map(doc => {
+    const { title, items } = doc.data();
+
+    return {
+      routeName: encodeURI(title.toLowerCase()),
+      id: doc.id,
+      title,
+      items,
+    };
+  });
+
+  return transfomed.reduce((acc, coll) => {
+    acc[coll.title.toLowerCase()] = coll;
+
+    return acc;
+  }, {});
+}
+
 export default firebase;
